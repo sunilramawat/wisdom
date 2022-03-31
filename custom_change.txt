@@ -1,0 +1,36 @@
+Block list
+Delete msgs 
+
+Delete user of chat
+
+lastmsg and  time  
+
+one- one  chat api
+chatmsglist
+chatlist  =>user list
+
+
+
+event => token challe  =>Done
+event live list =>Done
+end  event =>Done 
+join event   => Notification  => Not Needed
+
+
+1. "collectionList" api m inki Amazon, ebay and wondery Images and Urls b Required h.
+2. Live Streaming list ki api
+3. Add Post_id parameter in Notifications
+
+
+
+ALTER TABLE `users` DROP `fb_link`, DROP `linkedin_link`, DROP `twitter_link`, DROP `Instagram`; 
+
+ALTER TABLE `users` ADD `occupation` VARCHAR(255) NULL DEFAULT NULL AFTER `bio`, ADD `location` VARCHAR(255) NULL DEFAULT NULL AFTER `occupation`; 
+
+
+
+1. @Sunil - Cron job 30 mins for the video streaming =>done
+2. @Sunil - User block feature
+3. @Nishant Android update on comment section and social login
+4. @Bhavesh Rathi Cgt to check the Admin panel
+5. @Sunil - broadcasting termination notification  
