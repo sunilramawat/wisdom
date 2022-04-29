@@ -43,6 +43,7 @@ Route::post('forgotPassword','ApiController@forgotPassword');
 Route::post('resetPassword','ApiController@resetPassword');
 
 Route::post('create_post','ApiController@createPost')->middleware('auth:api');
+Route::post('sharePost','ApiController@sharePost')->middleware('auth:api');
 Route::post('repost','ApiController@repost')->middleware('auth:api');
 Route::get('post_list','ApiController@post_list')->middleware('auth:api');
 Route::delete('delete_post','ApiController@deletePost')->middleware('auth:api');
@@ -132,6 +133,7 @@ Route::get('chip_list','ApiController@chip_list')->middleware('auth:api');
 Route::get('chip_data_list','ApiController@chip_data_list')->middleware('auth:api');
 Route::get('agoraToken','ApiController@agoraToken')->middleware('auth:api');
 Route::post('createEvent','ApiController@createEvent')->middleware('auth:api');
+Route::post('eventJoin','ApiController@eventJoin')->middleware('auth:api');
 Route::get('eventList','ApiController@eventList')->middleware('auth:api');
 Route::get('endEvent','ApiController@endEvent')->middleware('auth:api');
 Route::get('cronJobForEndEvent','ApiController@cronJobForEndEvent');
@@ -140,6 +142,12 @@ Route::post('read_mark','ApiController@read_mark')->middleware('auth:api');
 Route::get('follower_list','ApiController@follower_list')->middleware('auth:api');
 Route::get('following_list','ApiController@following_list')->middleware('auth:api');
 Route::post('userPostSearch','ApiController@userPostSearch')->middleware('auth:api');
+
+
+///////////////phase 3
+Route::post('becomeCreater','ApiController@becomeCreater')->middleware('auth:api');
+Route::post('bankUpdate','ApiController@bankUpdate')->middleware('auth:api');
+
 /*
 Route::middleware('auth')->group(function () {
     Route::get('profile', [App\Http\Controllers\ApiController::class, 'profile'])->name('profile');

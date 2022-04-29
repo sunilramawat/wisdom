@@ -19,6 +19,7 @@ use App\Models\SubCategories;
 use App\Models\Gender;
 use App\Models\RoomMessage;
 use App\Models\Event;
+use App\Models\EventUser;
 use App\Models\Faq;
 use App\Models\BlockUser;
 use App\Models\Answer;
@@ -33,6 +34,7 @@ use App\Models\Notification;
 use App\Models\Room;
 use App\Models\SingleRoomMessage;
 use App\Models\Transaction;
+use App\Models\Creater;
 use Twilio\Rest\Client;
 use App\Http\Controllers\Utility\CustomVerfication;
 use App\Http\Controllers\Service\ApiService;
@@ -1121,6 +1123,7 @@ Class UserRepository extends User{
        // $partner_array['tags']  =   @$list['tags'] ? $list['tags'] : '';
         $partner_array['user_type']  =   @$list['user_type'] ? $list['user_type'] : '';
         $partner_array['post_type']  =   @$list['post_type'] ? $list['post_type'] : '';
+        $partner_array['share_count']  =   @$list['share_count'] ? $list['share_count'] : 0;
         
         $partner_array['post_data']['imgUrl']  =  array();
         $photo_list =  $this->get_photo_list($list['id']);
@@ -2418,6 +2421,7 @@ Class UserRepository extends User{
         
        
 
+        $partner_array['share_count']  =   @$list['share_count'] ? $list['share_count'] : 0;
         $partner_array['post_type']  =   @$list['post_type'] ? $list['post_type'] : '';
         //$partner_array['post_data']['imgUrl']  =   @$list['imgUrl'] ? $list['imgUrl'] : '';
         $partner_array['post_data']['imgUrl']  =  array();
@@ -2771,7 +2775,7 @@ Class UserRepository extends User{
 		//Client key
 		//prd($relData['notification_title']);
 		$serverKey = 'AAAAHp-Z9H8:APA91bHOXWGp1gNrqfuoTBioHB2JXpyRYSwehL7CQ62_hAJ9f-l5lHN1a6_2KR2QhBV1l4usJxeP9LQMRwJbGxbWdnCHQqhLaV-edGYkTdq4qucl7o7qMT3u5nSlLRLGGst18ysyQQYA';
-		$title = "Hopple";
+		$title = "Wisdom";
  		if(isset($relData['notification_title'])){
 			$title = $relData['notification_title'];
 		}
@@ -2812,7 +2816,7 @@ Class UserRepository extends User{
 	}
 	
 	public function ios_fcm_push($id, $message, $relData, $badge){
-		
+		//echo '<pre>'; print_r($relData['push_type']); exit;
 		$url = "https://fcm.googleapis.com/fcm/send";
 		$token =  $id; 
 		//Client key
@@ -2822,7 +2826,10 @@ Class UserRepository extends User{
  		if(isset($relData['notification_title'])){
 			$title = $relData['notification_title'];
 		}
-		
+		$content_available = false;
+		if($relData['push_type'] == 2){
+			$content_available = true;
+		}
 		if($relData['n_type'] == 7 ){
 			//echo  '<pre>'; print_r($relData['message']['text']); exit;
 			$body =$relData['message']['text'];
@@ -2840,13 +2847,13 @@ Class UserRepository extends User{
 			'relData' => $relData,
 			'badge' => (int)$badge,
 			);
-			$notification = array('title' =>$relData['name'] , 'body' => $body, 'sound' => 'default', 'badge' => $badge);
+			$notification = array('title' =>$relData['name'] , 'body' => $body, 'sound' => 'default', 'badge' => $badge, );
 		}
 
 
 			
 		
-		$arrayToSend = array('to' => $token, 'notification' => $notification,'priority'=>'high','data'=>$msg['data']['relData']);
+		$arrayToSend = array('to' => $token, 'notification' => $notification,'priority'=>'high','data'=>$msg['data']['relData'],'content_available' =>$content_available , "apns-priority"=> 5);
 		/*$arrayToSend = array('aps'=>array(
 		 	'relData' => $relData,
 		 	'alert' => $message, 
@@ -4290,9 +4297,11 @@ Class UserRepository extends User{
 		$data['message'] = $message;
 		$data['n_type'] = $n_type;
 		$data['ref_id'] = $ref_id;
+		$data['push_type'] = @$push_type?$push_type:1; 
 
 		$notify = array ();
 		$notify['receiver_id'] = $userArr;
+		$notify['push_type'] =  @$push_type?$push_type:1;
 		$notify['relData'] = $data;
 		$notify['message'] = $message;
 		//print_r($notify); exit;
@@ -4300,7 +4309,9 @@ Class UserRepository extends User{
 
 		if($n_type != 7){
 			if($n_type != 10){
-			$this->notification_save($userArr,$notify,$message,$user['first_name'],$n_type,$receiver_name,$device_token);
+				if($n_type != 20){
+					$this->notification_save($userArr,$notify,$message,$user['first_name'],$n_type,$receiver_name,$device_token);
+				}
 			}
 		}
 	}
@@ -4417,6 +4428,200 @@ Class UserRepository extends User{
 
 			
 		return $following;
+	}
+
+	public function sharePost($data){
+		//print_r($data); exit;
+		
+		if($data['post_id'] !=  ''){
+			@$data['userid'] = @$data['userid']?$data['userid'] :Auth::user()->id;
+			$send_notification = 0;
+			if(@$data['post_id']){
+				$post = Post::where('id','=',@$data['post_id'])
+					
+					->first();
+			}
+			
+			$post->share_count  = $post->share_count  + 1;
+			//echo '<pre>'; print_r($post); exit;
+			$post->save();
+			$lastid =$data['post_id'] ;
+			$partner_array['share_count'] = $post->share_count;
+			$partner_array['code'] = 200;
+		
+	       
+	
+
+		}else{
+
+			$partner_array['code'] = 633;
+
+		}
+
+		return $partner_array;
+	}
+
+	public function eventJoin($data){
+		//print_r($data); exit;
+		/*$userId = Auth::user()->id;
+	    	Event::where('e_u_id', $userId)
+       		->update([
+           'e_status' => 2
+    	]);*/	
+		$send_notification  = 1;
+		$eventUser = new EventUser();
+		$eventUser->e_u_id = Auth::user()->id;
+		$eventUser->e_channel = @$data['e_channel'] ? $data['e_channel']: '';
+		$eventUser->e_id = @$data['e_id'] ? $data['e_id']: '';
+		
+		//echo '<pre>'; print_r($group); exit;
+		$eventUser->save();
+		$lastid = $eventUser->id;
+		$event_id = $data['e_id'];
+		$e_channel = $data['e_channel'];
+		$list = EventUser::select('users.id as userid','users.first_name as first_name','users.last_name as last_name','users.username as username','users.photo as picUrl','users.user_status as is_verified','users.user_type as user_type','event_users.*')
+					->where('event_users.e_channel', $e_channel)
+					->leftjoin('users','event_users.e_u_id','users.id')
+					->groupBy('event_users.e_u_id')
+					->get();
+		//echo '<pre>'; print_r($list); exit;
+		$user_count = count($list);//post_id exit;
+		foreach ($list as $listkey => $listvalue) {
+            $photo_array['post_id']  =  @$listvalue->post_id ? $listvalue->post_id : '';
+            $sender = Auth::user()->id;
+            $message ="has join in event";
+            $n_type = 20;
+            $ref_id['event_id'] = $event_id;//event_id
+           	$ref_id['user_count'] = $user_count;//post_id
+            $push_type = 2; //1 for normal 2 for seclient 
+            // get follower list and send notification
+            //echo 'dsad'; exit;      
+            $userArr = $listvalue->e_u_id;
+            $this->notification_master($sender,$userArr,$message,$n_type,$ref_id,$push_type);
+               
+               
+        }
+        $event_user = Event::where('e_id',$data['e_id'])->first();
+        //echo '<pre>'; print_r($event_user); exit;
+        /// Send event admin
+        $photo_array['post_id']  =  @$listvalue->post_id ? $listvalue->post_id : '';
+        $sender = Auth::user()->id;
+        $message ="has join in event";
+        $n_type = 20;
+        $ref_id['event_id'] = $event_id;//event_id
+       	$ref_id['user_count'] = $user_count;//post_id
+
+        $push_type = 2; //1 for normal 2 for seclient 
+        // get follower list and send notification
+        //echo 'dsad'; exit;      
+        $userArr = $event_user->e_u_id;
+        $this->notification_master($sender,$userArr,$message,$n_type,$ref_id,$push_type);
+
+		$partner_array['code'] = 200;
+		$partner_array['data'] = $ref_id;
+
+	     
+		//echo '<pre>'; print_r($partner_array); exit;
+
+		return $partner_array;
+	}
+
+	// Phase 3 Task Start
+	public function becomeCreater($data){
+		//print_r($data); exit;
+		$userId = Auth::user()->id;
+		$find_user_detail = Creater::Where('c_u_id',@$userId)->first();
+		if(@$data['c_id']){
+			$creater = Creater::Where('c_u_id',@$userId)->first();
+		}
+		if(empty($find_user_detail)){
+			$creater = new Creater();
+			$creater->c_u_id  = Auth::user()->id;
+			$creater->about = @$data['about'] ? $data['about']: '';
+			$creater->monthly  = @$data['monthly'] ? $data['monthly']: '';
+			$creater->yearly  = @$data['yearly'] ? $data['yearly']: '';
+			$creater->status = 1;
+			//$creater->added_date  =  date ( 'Y-m-d H:i:s' );
+			//echo '<pre>'; print_r($group); exit;
+			$creater->save();
+			$lastid = $creater->c_id;
+
+		    User::where('id', $userId)
+	       		->update([
+	           'is_creater' => $lastid
+	    	]);	
+	    }else{
+
+	    	$creater->c_u_id  = Auth::user()->id;
+			$creater->about = @$data['about'] ? $data['about']: '';
+			$creater->content_type  = @$data['content_type'] ? $data['content_type']: '';
+			$creater->post_type  = @$data['post_type'] ? $data['post_type']: '';
+			$creater->weekly_post  = @$data['weekly_post'] ? $data['weekly_post']: '';
+			$creater->instagram  = @$data['instagram'] ? $data['instagram']: '';
+			$creater->twitter  = @$data['twitter'] ? $data['twitter']: '';
+			$creater->linkedin  = @$data['linkedin'] ? $data['linkedin']: '';
+			$creater->sell_merch  = @$data['sell_merch'] ? $data['sell_merch']: '';
+			$creater->link_merch  = @$data['link_merch'] ? $data['link_merch']: '';
+
+			//$creater->monthly  = @$data['monthly'] ? $data['monthly']: '';
+			//$creater->yearly  = @$data['yearly'] ? $data['yearly']: '';
+			//$creater->status = 1;
+			//$creater->added_date  =  date ( 'Y-m-d H:i:s' );
+			$creater->save();
+	       	$lastid = $find_user_detail->c_id;
+			//echo '<pre>'; print_r($creater); exit;
+	    }
+		$partner_array['code'] = 200;
+		$partner_array['data'] = $lastid;
+
+	     
+		//echo '<pre>'; print_r($partner_array); exit;
+
+		return $partner_array;
+	}
+
+
+	public function bankUpdate($data){
+		//print_r($data); exit;
+		$userId = Auth::user()->id;
+		$find_user_detail = Creater::Where('c_u_id',@$userId)->first();
+		if(@$data['c_id']){
+			$creater = Creater::Where('c_u_id',@$userId)->first();
+		}
+		if(empty($find_user_detail)){
+			$creater = new Creater();
+			$creater->c_u_id = $userId;
+			$creater->about = @$data['bank_name'] ? $data['bank_name']: '';
+			$creater->content_type  = @$data['account_number'] ? $data['account_number']: '';
+			$creater->post_type  = @$data['swift_number'] ? $data['swift_number']: '';
+			$creater->weekly_post  = @$data['uploded_doc'] ? $data['uploded_doc']: '';
+			$creater->save();
+	       	//$lastid = $find_user_detail->c_id;
+			$lastid = $creater->c_id;
+
+		   
+	    }else{
+	    	$creater = Creater::Where('c_u_id',@$userId)->first();
+	    	$creater->c_u_id  = Auth::user()->id;
+			$creater->about = @$data['bank_name'] ? $data['bank_name']: '';
+			$creater->content_type  = @$data['account_number'] ? $data['account_number']: '';
+			$creater->post_type  = @$data['swift_number'] ? $data['swift_number']: '';
+			$creater->weekly_post  = @$data['uploded_doc'] ? $data['uploded_doc']: '';
+			//$creater->monthly  = @$data['monthly'] ? $data['monthly']: '';
+			//$creater->yearly  = @$data['yearly'] ? $data['yearly']: '';
+			//$creater->status = 1;
+			//$creater->added_date  =  date ( 'Y-m-d H:i:s' );
+			$creater->save();
+	       	$lastid = $find_user_detail->c_id;
+			//echo '<pre>'; print_r($creater); exit;
+	    }
+		$partner_array['code'] = 200;
+		$partner_array['data'] = $lastid;
+
+	     
+		//echo '<pre>'; print_r($partner_array); exit;
+
+		return $partner_array;
 	}
 } 
 

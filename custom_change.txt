@@ -34,3 +34,10 @@ ALTER TABLE `users` ADD `occupation` VARCHAR(255) NULL DEFAULT NULL AFTER `bio`,
 3. @Nishant Android update on comment section and social login
 4. @Bhavesh Rathi Cgt to check the Admin panel
 5. @Sunil - broadcasting termination notification  
+
+
+//////////////////////////// Cretate 27-4-2022 New Phase
+1. ALTER TABLE `users` ADD `is_creater` INT(11) NULL DEFAULT '0' AFTER `is_notification`; 
+
+2. NEw Table =>creaters
+3. /var/www/html/wisdom/app/Models/Creater.php

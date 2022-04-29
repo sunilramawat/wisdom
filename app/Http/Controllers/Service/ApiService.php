@@ -2193,6 +2193,139 @@ Class ApiService{
 		
 		return  $data;
 	}
+
+	public function sharePost($method,$arg){
+
+		$data = new DataService();
+		$UserRepostitory = new UserRepository();
+
+		
+			if(Auth::user()->id){
+				
+				$arg['userid'] =  Auth::user()->id;
+				$gallery = $UserRepostitory->sharePost($arg);
+		
+				if($gallery['code'] == 200){
+
+					unset($gallery['code']);
+					$data->error_code = 218;
+					$data->data = $gallery;
+
+
+				}else{
+					unset($gallery['code']);
+					$data->error_code = 633;
+				}  
+		
+			}else{
+
+				$data->error_code =  414;  //UnAuthorize user
+			}
+
+		
+		return $data;
+	}
+
+	public function eventJoin($method,$arg){
+
+		$data = new DataService();
+		$UserRepostitory = new UserRepository();
+
+		
+			if(Auth::user()->id){
+				
+				$arg['userid'] =  Auth::user()->id;
+				$gallery = $UserRepostitory->eventJoin($arg);
+		
+				if($gallery['code'] == 200){
+
+					unset($gallery['code']);
+					$data->error_code = 218;
+					$data->data = $gallery;
+
+
+				}else{
+					unset($gallery['code']);
+					$data->error_code = 633;
+				}  
+		
+			}else{
+
+				$data->error_code =  414;  //UnAuthorize user
+			}
+
+		
+		return $data;
+	}
+
+	// Phase 3 Task Start
+	public function becomeCreater($method,$arg){
+
+		$data = new DataService();
+		$UserRepostitory = new UserRepository();
+
+	
+		if(Auth::user()->id){
+			
+			$arg['userid'] =  Auth::user()->id;
+			$gallery = $UserRepostitory->becomeCreater($arg);
+			//echo '<pre>'; print_r($gallery); exit;				
+			if($gallery['code'] == 200){
+
+				unset($gallery['code']);
+				$data->error_code = 223;
+				$data->data = $gallery;
+
+
+			}else{
+				unset($gallery['code']);
+				$data->error_code = 633;
+			}  
+	
+		}else{
+
+			$data->error_code =  414;  //UnAuthorize user
+		}
+
+		
+								
+		//echo '<pre>'; print_r($data); exit;
+		return $data;
+	}
+
+	public function bankUpdate($method,$arg){
+
+		$data = new DataService();
+		$UserRepostitory = new UserRepository();
+
+	
+		if(Auth::user()->id){
+			
+			$arg['userid'] =  Auth::user()->id;
+			$gallery = $UserRepostitory->bankUpdate($arg);
+			//echo '<pre>'; print_r($gallery); exit;				
+			if($gallery['code'] == 200){
+
+				unset($gallery['code']);
+				$data->error_code = 223;
+				$data->data = $gallery;
+
+
+			}else{
+				unset($gallery['code']);
+				$data->error_code = 633;
+			}  
+	
+		}else{
+
+			$data->error_code =  414;  //UnAuthorize user
+		}
+
+		
+								
+		//echo '<pre>'; print_r($data); exit;
+		return $data;
+	}
 	
 }
 

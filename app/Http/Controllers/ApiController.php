@@ -2018,6 +2018,7 @@ class ApiController extends Controller
                    // $partner_array['tags']  =   @$list['tags'] ? $list['tags'] : '';
                     $partner_array['user_type']  =   @$list['user_type'] ? $list['user_type'] : '';
                     $partner_array['post_type']  =   @$list['post_type'] ? $list['post_type'] : '';
+                    $partner_array['share_count']  =   @$list['share_count'] ? $list['share_count'] : 0;
                     $partner_array['post_data'] = array();
                     $partner_array['post_data']['imgUrl']  =  array();
                     $photo_list =  $UserRepostitory->get_photo_list($list['id']);
@@ -3869,7 +3870,7 @@ class ApiController extends Controller
         }
     }
 
-     public function cronJobForEndEvent(Request $request){
+    public function cronJobForEndEvent(Request $request){
         echo $startTime = date ( 'Y-m-d H:i:s' );
         echo '<br>';
         echo $today = date('Y-m-d H:i:s', strtotime('+31 minutes', strtotime($startTime)));
@@ -4220,6 +4221,187 @@ class ApiController extends Controller
                     'data'  =>  $user_list,
                    
                 ];
+            return $response;
+        }   
+    }
+
+
+    public function sharePost(Request $request){
+
+        $data = $request->all();
+        if($request->method() == 'POST'){
+
+            $rules = array(
+                    'post_id'   =>  'required');
+
+            $validate = Validator::make($data,$rules);
+
+            if($validate->fails()){
+                $validate_error = $validate->errors()->all();
+                $response = ['code' => 403, 'msg'=>  $validate_error[0]]; 
+
+            }else{
+                $ApiService = new ApiService();
+                $Check = $ApiService->sharePost(2, $data);
+                
+                    //print_r($Check); exit; 
+                $error_msg = new Msg();
+                $msg =  $error_msg->responseMsg($Check->error_code);
+            
+                if($Check->error_code == 218){
+                    $response = [
+                        'code' => 200,
+                        'msg'=>  "Share Count",
+                        'data' => $Check->data
+                    ];
+                }else{
+                    $response = [
+                        'code' => $Check->error_code,
+                        'msg'=>  $msg
+                    ];
+                }
+            }    
+            return $response;
+        }   
+    }
+
+
+    public function eventJoin(Request $request){
+
+        $data = $request->all();
+        if($request->method() == 'POST'){
+
+            $rules = array(
+                    'e_id'   =>  'required',
+                    'e_channel' => 'required',
+
+                );
+
+            $validate = Validator::make($data,$rules);
+
+            if($validate->fails()){
+                $validate_error = $validate->errors()->all();
+                $response = ['code' => 403, 'msg'=>  $validate_error[0]]; 
+
+            }else{
+                $ApiService = new ApiService();
+                $Check = $ApiService->eventJoin(2, $data);
+                
+                    //print_r($Check); exit; 
+                $error_msg = new Msg();
+                $msg =  $error_msg->responseMsg($Check->error_code);
+            
+                if($Check->error_code == 218){
+                    $response = [
+                        'code' => 200,
+                        'msg'=>  "Event Joined",
+                        'data' => $Check->data
+                    ];
+                }else{
+                    $response = [
+                        'code' => $Check->error_code,
+                        'msg'=>  $msg
+                    ];
+                }
+            }    
+            return $response;
+        }   
+    }
+
+    
+
+    // Phase 3 Task Start
+
+    /*****************************************************************************
+    * API                   => create Become Creater                             *
+    * Description           => It is Use to  create Become Creater               *
+    * Required Parameters   =>                                                   *
+    * Created by            => Sunil                                             *
+    *****************************************************************************/    
+    public function becomeCreater(Request $request){
+
+        $data = $request->all();
+        if($request->method() == 'POST'){
+
+            //'g_title'   => 'required|unique:groups,g_title',
+            /*$rules = array(
+                    'monthly'   => 'required',
+                    'yearly'   =>  'required');
+
+            $validate = Validator::make($data,$rules);
+
+            if($validate->fails()){
+                $validate_error = $validate->errors()->all();
+                $response = ['code' => 403, 'msg'=>  $validate_error[0]]; 
+
+            }else{*/
+                $ApiService = new ApiService();
+                $Check = $ApiService->becomeCreater(2, $data);
+                
+                // print_r($Check->data['data']); exit; 
+                $error_msg = new Msg();
+                $msg =  $error_msg->responseMsg($Check->error_code);
+            
+                if($Check->error_code == 223){
+                    $response = [
+                        'code' => 200,
+                        'msg'=>  'Become Created',
+                        'data' =>$Check->data['data']
+                    ];
+                }else{
+                    $response = [
+                        'code' => $Check->error_code,
+                        'msg'=>  $msg
+                    ];
+                }
+            //}    
+            return $response;
+        }   
+    }
+
+    /*****************************************************************************
+    * API                   => create bank Update                                *
+    * Description           => It is Use to  create bankUpdate                   *
+    * Required Parameters   =>                                                   *
+    * Created by            => Sunil                                             *
+    *****************************************************************************/    
+    public function bankUpdate(Request $request){
+
+        $data = $request->all();
+        if($request->method() == 'POST'){
+
+            //'g_title'   => 'required|unique:groups,g_title',
+            /*$rules = array(
+                    'monthly'   => 'required',
+                    'yearly'   =>  'required');
+
+            $validate = Validator::make($data,$rules);
+
+            if($validate->fails()){
+                $validate_error = $validate->errors()->all();
+                $response = ['code' => 403, 'msg'=>  $validate_error[0]]; 
+
+            }else{*/
+                $ApiService = new ApiService();
+                $Check = $ApiService->bankUpdate(2, $data);
+                
+                // print_r($Check->data['data']); exit; 
+                $error_msg = new Msg();
+                $msg =  $error_msg->responseMsg($Check->error_code);
+            
+                if($Check->error_code == 223){
+                    $response = [
+                        'code' => 200,
+                        'msg'=>  'Bank infomation updated',
+                        'data' =>$Check->data['data']
+                    ];
+                }else{
+                    $response = [
+                        'code' => $Check->error_code,
+                        'msg'=>  $msg
+                    ];
+                }
+            //}    
             return $response;
         }   
     }

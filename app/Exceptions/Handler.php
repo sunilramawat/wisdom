@@ -56,7 +56,7 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)
     {
-        if($exception->getMessage() == 'Route [register] not defined.'){
+       /* if($exception->getMessage() == 'Route [register] not defined.'){
             return response()->json(
                 [
                         'code' => 401,
@@ -72,7 +72,7 @@ class Handler extends ExceptionHandler
                     
                 ], 500
             );
-        }
+        }*/
         /*$res = json_encode($exception);
         print_r($res); exit;
         *//*return response()->json(
@@ -82,7 +82,7 @@ class Handler extends ExceptionHandler
                 
             ], 401
         );*/
-         //return parent::render($request, $exception);
+         return parent::render($request, $exception);
     }
    
 }
